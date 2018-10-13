@@ -1,6 +1,7 @@
 package com.wind.photoclass;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -8,9 +9,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.wind.photoclass.core.data.ImageFileHelper;
+import com.wind.photoclass.core.view.DialogUtils;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 public class HomeFileListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -94,6 +106,34 @@ public class HomeFileListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return 1;
     }
 
+    private View.OnLongClickListener longClickListener = new View.OnLongClickListener() {
+        @Override
+        public boolean onLongClick(View v) {
+            final File file = (File) v.getTag();
+            final int position = (int) v.getTag(R.id.holder_position) - getHeaderCount();
+            DialogUtils.showAskDialog(v.getContext(), v.getResources().getString(R.string.ask_delete_folder, file.getName()), R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Disposable disposable = Single.create(new SingleOnSubscribe<Object>() {
+                        @Override
+                        public void subscribe(SingleEmitter<Object> emitter) throws Exception {
+                            ImageFileHelper.deleteFile(file);
+                            fileList.remove(file);
+                            emitter.onSuccess(1);
+                        }
+                    }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<Object>() {
+                        @Override
+                        public void accept(Object o) throws Exception {
+                            notifyItemRemoved(position + getHeaderCount());
+                        }
+                    });
+                }
+            });
+
+            return true;
+        }
+    };
+
     class FileDirHolder extends RecyclerView.ViewHolder {
 
         private View itemView;
@@ -107,6 +147,8 @@ public class HomeFileListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         public void setData(File file) {
             itemView.setTag(file);
+            itemView.setTag(R.id.holder_position, getAdapterPosition());
+            itemView.setOnLongClickListener(longClickListener);
             name.setText(file.getName());
         }
 

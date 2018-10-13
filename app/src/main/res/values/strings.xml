@@ -13,4 +13,5 @@
     <string name="info">信息</string>
     <string name="ask_location_permission">定位权限被禁止，相关地图功能无法使用！</string>
     <string name="address">位置（更新）</string>
+    <string name="ask_delete_folder">确定删除%s吗？</string>
 </resources>

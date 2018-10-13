@@ -23,24 +23,6 @@
             android:background="@android:color/white"
             android:padding="16dp">
 
-            <TextView
-                android:id="@+id/project_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/project_name_input"
-                android:layout_marginBottom="10dp"
-                android:gravity="right"
-                android:text="@string/project_name"
-                android:textColor="#000" />
-
-            <EditText
-                android:id="@+id/project_name_input"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/project_name"
-                android:paddingLeft="10dp"
-                android:textColor="#000"
-                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/station_name"
@@ -57,11 +39,31 @@
                 android:id="@+id/station_name_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/project_name_input"
                 android:layout_toRightOf="@id/station_name"
                 android:paddingLeft="10dp"
                 android:textColor="#000"
                 android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/project_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@id/project_name_input"
+                android:layout_marginBottom="10dp"
+                android:gravity="right"
+                android:text="@string/project_name"
+                android:textColor="#000" />
+
+            <EditText
+                android:id="@+id/project_name_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/station_name_input"
+                android:layout_toRightOf="@id/project_name"
+                android:paddingLeft="10dp"
+                android:textColor="#000"
+                android:textSize="14sp" />
+
 
             <TextView
                 android:id="@+id/address"
@@ -77,7 +79,7 @@
                 android:id="@+id/address_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/station_name_input"
+                android:layout_below="@id/project_name_input"
                 android:layout_marginTop="5dp"
                 android:layout_toRightOf="@id/address"
                 android:paddingLeft="10dp"

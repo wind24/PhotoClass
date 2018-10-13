@@ -89,10 +89,28 @@ public class ImageFileHelper {
         return null;
     }
 
+    public static void deleteFile(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+
+        File[] files = file.listFiles();
+        int length = files.length;
+        for (int i = 0; i < length; i++) {
+            File child = files[i];
+            if (child.isDirectory()) {
+                deleteFile(child);
+            } else {
+                child.delete();
+            }
+        }
+        file.delete();
+    }
+
     public static void createDescTxt(File folder, String name) {
         File descFile = new File(folder, DESC_FILE_NAME);
         ProjectInfoModel model = new ProjectInfoModel();
-        model.setProjectName(name);
+//        model.setStationName(name);
         model.setCreateTime(System.currentTimeMillis());
         if (LocationManager.getInstance().getCurrLocationModel() != null) {
             LocationModel location = LocationManager.getInstance().getCurrLocationModel();

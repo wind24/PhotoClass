@@ -1,9 +1,13 @@
 package com.wind.photoclass.module.album.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.wind.photoclass.BuildConfig;
 import com.wind.photoclass.R;
@@ -105,14 +110,15 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
             if (descModel == null) {
                 descModel = new ProjectInfoModel();
                 descModel.setCreateTime(System.currentTimeMillis());
-                descModel.setProjectName(folderFile.getName());
+//                descModel.setStationName(folderFile.getName());
             }
             createTimeInput.setText(TimeUtils.parseTimeToYMDTime(descModel.getCreateTime()));
-            projectNameInput.setText(descModel.getProjectName());
+            if (!TextUtils.isEmpty(descModel.getProjectName())) {
+                projectNameInput.setText(descModel.getProjectName());
+            }
             if (!TextUtils.isEmpty(descModel.getStationName())) {
                 stationNameInput.setText(descModel.getStationName());
             }
-
             if (!TextUtils.isEmpty(descModel.getAddress())) {
                 addressInput.setText(descModel.getAddress());
             }
@@ -147,9 +153,15 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.camera:
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);// 启动系统相机
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", tempFile)); //Uri.fromFile(tempFile)
-                startActivityForResult(intent, 1);
+                if (ContextCompat.checkSelfPermission(
+                        this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, 1);
+                } else {
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);// 启动系统相机
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", tempFile)); //Uri.fromFile(tempFile)
+                    startActivityForResult(intent, 1001);
+                }
+
                 break;
             case R.id.info:
                 infoLayout.setVisibility(View.VISIBLE);
@@ -201,6 +213,22 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
             });
         }
     }
+
+    @Override
+
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 1001) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //权限获取成功
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);// 启动系统相机
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", tempFile)); //Uri.fromFile(tempFile)
+                startActivityForResult(intent, 1001);
+            } else {
+                Toast.makeText(this, R.string.permission_camera_denied, Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
 
     private TextWatcher projectWatcher = new TextWatcher() {
         @Override
