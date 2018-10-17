@@ -114,7 +114,7 @@ public class ImageFileHelper {
     public static void createDescTxt(File folder, String name) {
         File descFile = new File(folder, DESC_FILE_NAME);
         ProjectInfoModel model = new ProjectInfoModel();
-//        model.setStationName(name);
+        model.setStationName(name);
         model.setCreateTime(System.currentTimeMillis());
         if (LocationManager.getInstance().getCurrLocationModel() != null) {
             LocationModel location = LocationManager.getInstance().getCurrLocationModel();

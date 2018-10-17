@@ -117,7 +117,7 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
             if (descModel == null) {
                 descModel = new ProjectInfoModel();
                 descModel.setCreateTime(System.currentTimeMillis());
-//                descModel.setStationName(folderFile.getName());
+                descModel.setStationName(folderFile.getName());
             }
             createTimeInput.setText(TimeUtils.parseTimeToYMDTime(descModel.getCreateTime()));
             if (!TextUtils.isEmpty(descModel.getProjectName())) {

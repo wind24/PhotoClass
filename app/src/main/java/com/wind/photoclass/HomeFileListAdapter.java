@@ -40,7 +40,11 @@ public class HomeFileListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public void setFileList(List<File> fileList) {
-        this.fileList = fileList;
+        if (this.fileList == null) {
+            this.fileList = new ArrayList<>();
+        }
+        this.fileList.clear();
+        this.fileList.addAll(fileList);
         notifyDataSetChanged();
     }
 
