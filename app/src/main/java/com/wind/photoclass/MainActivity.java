@@ -7,13 +7,17 @@ import android.support.annotation.NonNull;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
 import com.wind.photoclass.base.BaseActivity;
 import com.wind.photoclass.core.data.ImageFileHelper;
-import com.wind.photoclass.core.data.OnImageDirLoadListener;
+import com.wind.photoclass.core.data.StationSearchHelper;
 import com.wind.photoclass.core.utils.LocationManager;
+import com.wind.photoclass.core.utils.OnNotifyListener;
 import com.wind.photoclass.core.view.CreateDirectDialog;
 import com.wind.photoclass.module.album.ui.FolderDetailActivity;
 
@@ -24,12 +28,13 @@ public class MainActivity extends BaseActivity {
 
     private HomeFileListAdapter adapter;
     private CreateDirectDialog directDialog;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setTitle(R.string.app_name);
+        setTitle(getString(R.string.app_name) + "--" + getString(R.string.south_cmcc_design));
         initView();
         loadData();
     }
@@ -52,12 +57,42 @@ public class MainActivity extends BaseActivity {
 
     private void loadData() {
         LocationManager.getInstance().startLocation(this, null);
-        ImageFileHelper.loadHomeDirects(new OnImageDirLoadListener() {
+        search("");
+    }
+
+    private void search(String query) {
+        StationSearchHelper.getInstance().search(query, new OnNotifyListener<List<File>>() {
             @Override
-            public void onDirLoad(List<File> files) {
-                adapter.setFileList(files);
+            public void onCallback(List<File> data) {
+                adapter.setFileList(data);
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_search);
+        //通过MenuItem得到SearchView
+        mSearchView = (SearchView) searchItem.getActionView();
+        mSearchView.setQueryHint(getString(R.string.search_hint));
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                search(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (mSearchView.getQuery().length() == 0) {
+                    search("");
+                    return true;
+                }
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -102,7 +137,11 @@ public class MainActivity extends BaseActivity {
     CreateDirectDialog.OnCreateDirectListener createDirectListener = new CreateDirectDialog.OnCreateDirectListener() {
         @Override
         public void onDirectCreated(File file) {
-            adapter.addFile(file);
+            if (file != null) {
+                adapter.addFile(file);
+                //添加文件的时候也添加搜索全文件缓存
+                StationSearchHelper.getInstance().addFile(file);
+            }
         }
     };
 }

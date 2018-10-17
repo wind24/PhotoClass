@@ -48,16 +48,7 @@ public class ImageFileHelper {
         Disposable disposable = Single.create(new SingleOnSubscribe<List<File>>() {
             @Override
             public void subscribe(SingleEmitter<List<File>> emitter) throws Exception {
-                List<File> result = new ArrayList<>();
-                File[] files = rootDir.listFiles();
-                if (files != null && files.length > 0) {
-                    for (File file : files) {
-                        if (file.isDirectory()) {
-                            result.add(file);
-                        }
-                    }
-                }
-                emitter.onSuccess(result);
+                emitter.onSuccess(loadAllFile());
             }
         }).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(new Consumer<List<File>>() {
             @Override
@@ -67,6 +58,19 @@ public class ImageFileHelper {
                 }
             }
         });
+    }
+
+    public static List<File> loadAllFile() {
+        List<File> result = new ArrayList<>();
+        File[] files = rootDir.listFiles();
+        if (files != null && files.length > 0) {
+            for (File file : files) {
+                if (file.isDirectory()) {
+                    result.add(file);
+                }
+            }
+        }
+        return result;
     }
 
     public static File createDirect(File dir, String name) {
@@ -142,7 +146,7 @@ public class ImageFileHelper {
         int length = files.length;
         for (int i = 0; i < length; i++) {
             File file = files[i];
-            if (file.isFile()) {
+            if (file.isFile() && file.getName().contains(".jpg")) {
                 result.add(file);
             }
         }

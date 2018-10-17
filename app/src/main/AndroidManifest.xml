@@ -64,6 +64,9 @@
         <activity
             android:name=".module.album.ui.FolderDetailActivity"
             android:screenOrientation="portrait" />
+
+        <activity android:name=".module.album.ui.ImageWatcherActivity"
+            android:screenOrientation="portrait"/>
     </application>
 
 </manifest>

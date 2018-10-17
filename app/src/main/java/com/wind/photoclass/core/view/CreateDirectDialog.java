@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.wind.photoclass.R;
 import com.wind.photoclass.core.data.ImageFileHelper;
@@ -82,6 +83,14 @@ public class CreateDirectDialog extends DialogFragment {
                 String fileName = name.getText().toString().trim();
                 if (parent == null) {
                     parent = ImageFileHelper.getRootDir();
+                }
+                File temp = new File(parent, fileName);
+                if (temp.exists()) {
+                    Toast.makeText(getContext(), R.string.station_already_exists, Toast.LENGTH_SHORT).show();
+                    if (directListener != null) {
+                        directListener.onDirectCreated(null);
+                    }
+                    return;
                 }
                 File file = ImageFileHelper.createDirect(parent, fileName);
                 if (file != null) {

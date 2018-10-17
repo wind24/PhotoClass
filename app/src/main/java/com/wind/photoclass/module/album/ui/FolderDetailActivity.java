@@ -1,6 +1,7 @@
 package com.wind.photoclass.module.album.ui;
 
 import android.Manifest;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -33,8 +34,10 @@ import com.wind.photoclass.core.utils.GsonUtils;
 import com.wind.photoclass.core.utils.LocationManager;
 import com.wind.photoclass.core.utils.OnNotifyListener;
 import com.wind.photoclass.core.utils.TimeUtils;
+import com.wind.photoclass.core.view.DialogUtils;
 import com.wind.photoclass.module.album.logic.AlbumItemDecoration;
 import com.wind.photoclass.module.album.logic.FolderDetailHelper;
+import com.wind.photoclass.module.album.logic.OnFolderDetailListener;
 
 import java.io.File;
 import java.util.List;
@@ -53,6 +56,9 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
     EditText stationNameInput;
     TextView addressInput;
     View address;
+    MenuItem delete;
+    MenuItem camera;
+    MenuItem info;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -86,6 +92,7 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         int padding = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 5, getResources().getDisplayMetrics());
         listView.addItemDecoration(new AlbumItemDecoration(3, padding));
         adapter = new FolderDetailAdapter(this);
+        adapter.setDetailListener(detailListener);
         listView.setAdapter(adapter);
     }
 
@@ -143,9 +150,24 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         });
     }
 
+    private void onShowSelectionMode() {
+        delete.setVisible(true);
+        camera.setVisible(false);
+        info.setVisible(false);
+    }
+
+    private void onHideSelectionMode() {
+        delete.setVisible(false);
+        camera.setVisible(true);
+        info.setVisible(true);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.menu_album, menu);
+        delete = menu.findItem(R.id.delete);
+        camera = menu.findItem(R.id.camera);
+        info = menu.findItem(R.id.info);
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -166,6 +188,17 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
             case R.id.info:
                 infoLayout.setVisibility(View.VISIBLE);
                 break;
+            case R.id.delete:
+                if (adapter.getSelected() != null && !adapter.getSelected().isEmpty()) {
+                    DialogUtils.showAskDialog(this, getString(R.string.ask_delete_selected_files), R.string.ok, R.string.cancel, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            adapter.removeAllSelected();
+                            Toast.makeText(getApplicationContext(), R.string.delete_success, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -176,6 +209,15 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         saveDesc();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (adapter.isSelectionMode()) {
+            adapter.setSelectionMode(false);
+            onHideSelectionMode();
+            return;
+        }
+        super.onBackPressed();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -215,7 +257,6 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
     }
 
     @Override
-
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         if (requestCode == 1001) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
@@ -229,6 +270,12 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         }
     }
 
+    OnFolderDetailListener detailListener = new OnFolderDetailListener() {
+        @Override
+        public void onSelectionShown() {
+            onShowSelectionMode();
+        }
+    };
 
     private TextWatcher projectWatcher = new TextWatcher() {
         @Override

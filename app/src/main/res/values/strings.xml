@@ -1,17 +1,24 @@
 <resources>
-    <string name="app_name">图类</string>
+    <string name="app_name">查勘相机</string>
     <string name="camera">相机</string>
     <string name="permission_camera_denied">请授权本应用使用相机权限</string>
     <string name="permission_camera_neverask">请授权本应用使用相机权限</string>
     <string name="target_dir_cannot_empty">目标文件夹不能为空</string>
-    <string name="pls_enter_folder_name">请输入文件夹名称</string>
+    <string name="pls_enter_folder_name">请输入站点名称</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
-    <string name="project_name">工程名</string>
-    <string name="station_name">站名</string>
+    <string name="project_name">工程名称</string>
+    <string name="station_name">站点名称</string>
     <string name="create_time">创建时间</string>
     <string name="info">信息</string>
     <string name="ask_location_permission">定位权限被禁止，相关地图功能无法使用！</string>
-    <string name="address">位置（更新）</string>
+    <string name="address">位置</string>
     <string name="ask_delete_folder">确定删除%s吗？</string>
+    <string name="station_already_exists">站名已存在</string>
+    <string name="delete">删除</string>
+    <string name="ask_delete_selected_files">确定要删除选中文件吗？</string>
+    <string name="delete_success">删除成功</string>
+    <string name="south_cmcc_design">南方电信设计</string>
+    <string name="search">搜索</string>
+    <string name="search_hint">请输入站名、工程名进行搜索</string>
 </resources>

@@ -3,6 +3,7 @@ package com.wind.photoclass.base;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -53,12 +54,18 @@ public class BaseActivity extends AppCompatActivity {
 
     @Override
     public void setTitle(int titleId) {
-        toolbar.setTitle(titleId);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(titleId);
+        }
     }
 
     @Override
     public void setTitle(CharSequence title) {
-        toolbar.setTitle(title);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(title);
+        }
     }
 
     @Override
