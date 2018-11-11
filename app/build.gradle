@@ -6,8 +6,8 @@ android {
         applicationId "com.wind.photoclass"
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 3
-        versionName "1.0"
+        versionCode 4
+        versionName "1.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         ndk {
             //设置支持的SO库架构（开发者可以根据需要，选择一个或多个平台的so）
@@ -19,6 +19,13 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    sourceSets {
+        main {
+            //So路径配置
+            jniLibs.srcDirs = ['libs']
+        }
+
     }
 }
 
@@ -40,6 +47,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     //定位功能
     implementation 'com.amap.api:location:4.2.0'
-
     implementation 'com.github.chrisbanes:PhotoView:2.0.0'
 }

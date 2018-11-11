@@ -1,9 +1,11 @@
 package com.wind.photoclass.module.album.ui;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
@@ -15,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +26,10 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.baidu.netdisk.open.FileInfo;
+import com.baidu.netdisk.sdk.ConflictStrategy;
+import com.baidu.netdisk.sdk.NetDiskSDK;
+import com.baidu.netdisk.sdk.ResultCallBack;
 import com.wind.photoclass.BuildConfig;
 import com.wind.photoclass.R;
 import com.wind.photoclass.base.BaseActivity;
@@ -34,7 +41,9 @@ import com.wind.photoclass.core.utils.GsonUtils;
 import com.wind.photoclass.core.utils.LocationManager;
 import com.wind.photoclass.core.utils.OnNotifyListener;
 import com.wind.photoclass.core.utils.TimeUtils;
+import com.wind.photoclass.core.utils.ZipHelper;
 import com.wind.photoclass.core.view.DialogUtils;
+import com.wind.photoclass.core.view.ProgressDialog;
 import com.wind.photoclass.module.album.logic.AlbumItemDecoration;
 import com.wind.photoclass.module.album.logic.FolderDetailHelper;
 import com.wind.photoclass.module.album.logic.OnFolderDetailListener;
@@ -59,6 +68,9 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
     MenuItem delete;
     MenuItem camera;
     MenuItem info;
+    MenuItem cloud;
+
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -154,12 +166,14 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         delete.setVisible(true);
         camera.setVisible(false);
         info.setVisible(false);
+        cloud.setVisible(false);
     }
 
     private void onHideSelectionMode() {
         delete.setVisible(false);
         camera.setVisible(true);
         info.setVisible(true);
+        cloud.setVisible(true);
     }
 
     @Override
@@ -167,6 +181,7 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
         getMenuInflater().inflate(R.menu.menu_album, menu);
         delete = menu.findItem(R.id.delete);
         camera = menu.findItem(R.id.camera);
+        cloud = menu.findItem(R.id.cloud);
         info = menu.findItem(R.id.info);
         return super.onCreateOptionsMenu(menu);
     }
@@ -199,14 +214,80 @@ public class FolderDetailActivity extends BaseActivity implements View.OnClickLi
                     });
                 }
                 break;
+            case R.id.cloud:
+                if (adapter.getFiles() == null || adapter.getFiles().isEmpty()) {
+                    break;
+                }
+                //压缩文件
+                File zipFile = new File(folderFile.getParent(), folderFile.getName() + ".zip");
+                boolean ret = ZipHelper.zipFiles(new File[]{folderFile}, zipFile.getAbsolutePath());
+                Log.d("FolderDetailActivity", "compress file zip ret=" + ret);
+                //将没同步的文件上传
+                shareFile(zipFile);
+                break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    // 調用系統方法分享文件
+    public void shareFile(File file) {
+        if (null != file && file.exists()) {
+            Intent share = new Intent(Intent.ACTION_SEND);
+            share.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
+            share.setType("application/zip");//此处可发送多种文件
+            startActivity(Intent.createChooser(share, "分享文件"));
+        }
+    }
+
+    private void uploadOneFile(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+        showProgress();
+        NetDiskSDK.getInstance().uploadFile(this, file.getAbsolutePath(), null, ConflictStrategy.OVERLAY_FILE, null, new ResultCallBack() {
+            @Override
+            public void onStart(String s, String s1) {
+            }
+
+            @Override
+            public void onEvent(String s, String s1, List<FileInfo> list) {
+                goneProgress();
+                Toast.makeText(FolderDetailActivity.this, "上传成功", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(String s, int i) {
+                Log.e("FolderDetailActivity", "onError reason:" + s + ",code=" + i);
+                goneProgress();
+                Toast.makeText(FolderDetailActivity.this, "上传失败", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         saveDesc();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        NetDiskSDK.getInstance().doDestroy(this);
+    }
+
+    private void showProgress() {
+        if (dialog == null) {
+            dialog = new ProgressDialog();
+        }
+
+        dialog.show(getSupportFragmentManager(), "detail");
+    }
+
+    private void goneProgress() {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
     }
 
     @Override

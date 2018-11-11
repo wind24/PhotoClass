@@ -104,6 +104,10 @@ public class FolderDetailAdapter extends RecyclerView.Adapter<FolderDetailAdapte
         this.detailListener = detailListener;
     }
 
+    public List<File> getFiles() {
+        return files;
+    }
+
     @NonNull
     @Override
     public FolderDetailAdapter.ImageHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

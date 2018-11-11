@@ -34,6 +34,9 @@
             android:name="com.amap.api.v2.apikey"
             android:value="91d6e323d3b77177a6cf9e357dd98454" />
         <!-- 高德地图配置 end -->
+        <meta-data
+            android:name="com.baidu.netdisk.sdk.app_id"
+            android:value="1234" />
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.wind.photoclass.provider"
@@ -43,6 +46,16 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/provider_paths" />
         </provider>
+
+        <!--百度云 start -->
+        <activity android:name=".yunsdk.BaiduYunEntryActivity" />
+
+        <service
+            android:name="com.baidu.netdisk.sdk.SDKService"
+            android:exported="true"
+            />
+
+        <!--百度云 end-->
 
         <activity android:name=".MainActivity">
             <intent-filter>
